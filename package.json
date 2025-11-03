@@ -1,0 +1,32 @@
+{
+  "name": "stage-3",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@ai-sdk/groq": "^2.0.27",
+    "@mastra/core": "^0.23.3",
+    "@types/express": "^5.0.5",
+    "ai": "^5.0.86",
+    "axios": "^1.13.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "groq-sdk": "^0.34.0",
+    "install": "^0.13.0",
+    "npm": "^11.6.2",
+    "zod": "^3.25.76"
+  }
+}
