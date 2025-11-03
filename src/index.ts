@@ -4,6 +4,8 @@ import "dotenv/config"
 
 const app = express();
 app.use(express.json());
+const PORT = process.env.PORT || 3000;
+
 
 app.get("/", async (req, res) => {
   res.json({ message: "Hello, World!" });
@@ -51,6 +53,6 @@ app.get("/test-risk", async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
