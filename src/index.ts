@@ -13,17 +13,29 @@ app.get("/", async (req, res) => {
 
 app.post("/agent", async (req, res) => {
   try {
-    console.log("Received request:", req.body);
-    const { message, id } = req.body;
+    console.log("Received request:", JSON.stringify(req.body, null, 2));
+    
+    // Extract message from A2A JSON-RPC format
+    // Telex sends: { jsonrpc, id, method, params: { message: { parts: [{ text }] } } }
+    const userMessage = 
+      req.body.params?.message?.parts?.[0]?.text || // A2A format from Telex
+      req.body.message; // Fallback for direct testing
 
-    if (!message) {
+    const requestId = req.body.id || `task-${Date.now()}`;
+
+    if (!userMessage) {
       return res.status(400).json({
-        error: "Message is required",
+        jsonrpc: "2.0",
+        id: requestId,
+        error: {
+          code: -32602,
+          message: "Invalid params: message is required",
+        },
       });
     }
 
-    console.log("Generating response for:", message);
-    const response = await cryptoAgent.generate(message);
+    console.log("Generating response for:", userMessage);
+    const response = await cryptoAgent.generate(userMessage);
 
     const { text } = response;
     console.log("Generated response:", text);
@@ -31,7 +43,7 @@ app.post("/agent", async (req, res) => {
     // Return A2A protocol compliant response (JSON-RPC 2.0 format)
     return res.status(200).json({
       jsonrpc: "2.0",
-      id: id || `task-${Date.now()}`,
+      id: requestId,
       result: {
         role: "assistant",
         content: text,
