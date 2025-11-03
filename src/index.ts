@@ -14,7 +14,7 @@ app.get("/", async (req, res) => {
 app.post("/agent", async (req, res) => {
   try {
     console.log("Received request:", req.body);
-    const { message } = req.body;
+    const { message, id } = req.body;
 
     if (!message) {
       return res.status(400).json({
@@ -28,8 +28,28 @@ app.post("/agent", async (req, res) => {
     const { text } = response;
     console.log("Generated response:", text);
 
+    // Return A2A protocol compliant response with artifacts
     return res.status(200).json({
-      message: text,
+      source: "2.0",
+      id: id || `crypto-${Date.now()}`,
+      result: {
+        role: "assistant",
+        content: text,
+        context: "",
+        status: {
+          state: "completed",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      artifacts: [
+        {
+          type: "text",
+          title: "Crypto Analysis",
+          content: text,
+        },
+      ],
+      history: [],
+      kind: "task",
     });
   } catch (error) {
     console.error("Error in /agent endpoint:", error);
