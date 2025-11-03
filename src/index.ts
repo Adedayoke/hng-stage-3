@@ -13,18 +13,28 @@ app.get("/", async (req, res) => {
 
 app.post("/agent", async (req, res) => {
   try {
+    console.log("Received request:", req.body);
     const { message } = req.body;
 
+    if (!message) {
+      return res.status(400).json({
+        error: "Message is required",
+      });
+    }
+
+    console.log("Generating response for:", message);
     const response = await cryptoAgent.generate(message);
 
     const { text } = response;
+    console.log("Generated response:", text);
 
     return res.status(200).json({
       message: text,
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error,
+    console.error("Error in /agent endpoint:", error);
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
       message: "Something went wrong",
     });
   }
