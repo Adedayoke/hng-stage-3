@@ -40,25 +40,74 @@ app.post("/agent", async (req, res) => {
     const { text } = response;
     console.log("Generated response:", text);
 
-    // Return A2A protocol compliant response (JSON-RPC 2.0 format)
+    // Extract IDs from request or generate new ones
+    const taskId = req.body.params?.message?.taskId || `task-${Date.now()}`;
+    const messageId = req.body.params?.message?.messageId || `msg-${Date.now()}`;
+    const contextId = req.body.params?.contextId || `context-${Date.now()}`;
+    const responseMessageId = `response-${Date.now()}`;
+    const artifactId = `artifact-${Date.now()}`;
+
+    // Return A2A protocol compliant response (matching Phoenix's exact format)
     return res.status(200).json({
       jsonrpc: "2.0",
       id: requestId,
       result: {
-        role: "assistant",
-        content: text,
-        artifacts: [
-          {
-            type: "text",
-            title: "Crypto Analysis",
-            content: text,
-          },
-        ],
-        context: {},
+        id: taskId,
+        contextId: contextId,
         status: {
           state: "completed",
           timestamp: new Date().toISOString(),
+          message: {
+            messageId: responseMessageId,
+            role: "agent",
+            parts: [
+              {
+                kind: "text",
+                text: text,
+              },
+            ],
+            kind: "message",
+          },
         },
+        artifacts: [
+          {
+            artifactId: artifactId,
+            name: "cryptoAgentResponse",
+            parts: [
+              {
+                kind: "text",
+                text: text,
+              },
+            ],
+          },
+        ],
+        history: [
+          {
+            kind: "message",
+            role: "user",
+            parts: [
+              {
+                kind: "text",
+                text: userMessage,
+              },
+            ],
+            messageId: messageId,
+            taskId: taskId,
+          },
+          {
+            kind: "message",
+            role: "agent",
+            parts: [
+              {
+                kind: "text",
+                text: text,
+              },
+            ],
+            messageId: responseMessageId,
+            taskId: taskId,
+          },
+        ],
+        kind: "task",
       },
     });
   } catch (error) {
