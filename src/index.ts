@@ -28,34 +28,36 @@ app.post("/agent", async (req, res) => {
     const { text } = response;
     console.log("Generated response:", text);
 
-    // Return A2A protocol compliant response with artifacts
+    // Return A2A protocol compliant response (JSON-RPC 2.0 format)
     return res.status(200).json({
-      source: "2.0",
-      id: id || `crypto-${Date.now()}`,
+      jsonrpc: "2.0",
+      id: id || `task-${Date.now()}`,
       result: {
         role: "assistant",
         content: text,
-        context: "",
+        artifacts: [
+          {
+            type: "text",
+            title: "Crypto Analysis",
+            content: text,
+          },
+        ],
+        context: {},
         status: {
           state: "completed",
           timestamp: new Date().toISOString(),
         },
       },
-      artifacts: [
-        {
-          type: "text",
-          title: "Crypto Analysis",
-          content: text,
-        },
-      ],
-      history: [],
-      kind: "task",
     });
   } catch (error) {
     console.error("Error in /agent endpoint:", error);
     return res.status(500).json({
-      error: error instanceof Error ? error.message : "Unknown error",
-      message: "Something went wrong",
+      jsonrpc: "2.0",
+      id: req.body.id || null,
+      error: {
+        code: -32603,
+        message: error instanceof Error ? error.message : "Internal error",
+      },
     });
   }
 });
